@@ -50,7 +50,7 @@ func someFunctionName() {
 
 ## Performance
 
-The slice-based queue implementation is more performant, in both time and memory. The total allocation requirement will be similar between the squeue and linked list queue, but the squeue is generally over twice as fast.
+The slice-based queue implementation is more performant than a linked list queue, in both time and memory. The total allocation requirement will be similar between the two, but the squeue is generally over twice as fast.
 
 This is because the squeue amortizes the time cost of allocation by growing and shrinking the underlying slice as needed. This behavior allows for quicker writes to the data structure, because we don't need to allocate anything in order to add something. The linked list queue must make an allocation every time data is added.
 
