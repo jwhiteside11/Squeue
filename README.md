@@ -46,7 +46,7 @@ func someFunctionName() {
 
 ## Available methods
 
-- **New() Squeue** - Create a queue
+- **New(elems ...interface{}) Squeue** - Create a queue
 - **(queue Squeue) Enqueue(elem interface{})** - Add element to back of queue
 - **(queue Squeue) Peek () (interface{}, error)** - Retrieve, but do not remove, element from head of queue
 - **(queue Squeue) Dequeue() (interface{}, error)** - Remove element from head of queue
