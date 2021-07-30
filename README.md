@@ -30,6 +30,7 @@ func someFunctionName() {
 	for !queue.Empty() {
 		queue.Dequeue()
 	}
+	
 	_, err := queue.Dequeue()
 	if err != nil {
 		fmt.Println(err)
