@@ -51,11 +51,11 @@ func someFunctionName() {
 
 ## Performance
 
-The slice-based queue implementation is more performant than a linked list queue, in both time and memory. The total allocation requirement will be similar between the two, but the squeue is generally over twice as fast.
+The slice-based queue implementation is more performant than a linked list queue, in both time and memory. The memory requirement is similar between the two, but the squeue is generally over twice as fast. That said, slices are a linear data structure, which has certain implications in memory usage.
 
-This is because the squeue amortizes the time cost of allocation by growing and shrinking the underlying slice as needed. This behavior allows for quicker writes to the data structure, because we don't need to allocate anything in order to add an element. The linked list queue must spend time allocating the element each time one is added.
+The squeue is faster because it amortizes the time cost of allocation by growing and shrinking the underlying slice as needed. This behavior allows for quicker writes to the data structure, because we don't need to allocate anything in order to add an element. The linked list queue must spend time allocating an element each time one is added.
 
-The memory concerns present in a slice-based queue implementation have been addressed in this module. Unused values are discarded, and the underlying slice reallocates periodically as the queue gets used. The former saves on total allocation, the latter tells the GC that we are no longer using the slice's underlying array. This way, the queue will not leak memory over time.
+The concerns regarding memory in a slice-based queue implementation have been addressed in this module. Unused values are discarded, and the underlying slice reallocates periodically as the queue gets used. The former saves on total allocation, the latter tells the GC that we are no longer using the slice's underlying array. This way, the queue will not leak memory over time.
 
 ## Contributions
 
