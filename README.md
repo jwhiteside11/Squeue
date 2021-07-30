@@ -52,7 +52,7 @@ func someFunctionName() {
 - **(queue Squeue) Dequeue() (interface{}, error)** - Remove element from head of queue
 - **(queue Squeue) Size() int** - Get size of queue
 - **(queue Squeue) Empty() bool** - Returns true if queue is empty
-- **(queue Squeue) Each() []interface{}** - Returns a new slice pointing containing only the underlying slice values; convinience method
+- **(queue Squeue) Each() []interface{}** - Returns a new slice containing only the underlying slice values; convinience method
 - **(queue Squeue) String() string** - String representation of underlying slice values
 
 ## Performance
