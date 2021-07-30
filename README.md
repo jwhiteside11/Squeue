@@ -1,4 +1,4 @@
-# Squeue | Slice-based queue
+# Squeue = Slice-based queue
 
 Go does not have a built-in queue data type. I took to the internet to view common solutions for this, and found that there were two that were widely used:
 - 1) Use a slice; the append method handles adding to the queue, removing is done with the slicing syntax. This works well, but the internals give rise to memory concerns.
