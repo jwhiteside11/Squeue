@@ -59,7 +59,7 @@ func someFunctionName() {
 
 The slice-based queue implementation is more performant than a linked list queue, in both time and memory. The memory requirement is similar between the two, but the squeue is generally over twice as fast. That said, slices are a linear data structure, so we must consider certain memory implications.
 
-The squeue is faster because it amortizes the time cost of allocation by growing and shrinking the underlying slice as needed. This behavior allows for quicker writes to the data structure, because we don't need to allocate anything in order to add an element; we simply assign it a memory address. The linked list queue must spend time allocating an element each time one is added. Also, the edges between elements account for O(N) memory, whereas the squeue two pointers method is O(1) memory.
+The squeue is faster because it amortizes the time cost of allocation by growing and shrinking the underlying slice as needed. This behavior allows for quicker writes to the data structure, because we don't need to allocate anything in order to add an element; we simply assign it a memory address. The linked list queue must spend time allocating an element each time one is added. Also, the edges between elements use O(N) memory, whereas the squeue's two-pointers method uses O(1) memory.
 
 The memory implications of a slice-based queue implementation have been addressed in this module. Unused values are discarded, and the underlying slice reallocates periodically as the queue gets used. The reallocation tells the GC that we are no longer using the slice's old underlying array. This way, the queue will not leak memory over time.
 
