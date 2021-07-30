@@ -1,4 +1,4 @@
-package Squeue
+package squeue
 
 import (
 	"fmt"
