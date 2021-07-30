@@ -46,14 +46,14 @@ func someFunctionName() {
 
 ## Available methods
 
-- **New() Squeue {}** - Create a queue
-- **Enqueue(elem interface{})** - Add element to back of queue
-- **Peek () (interface{}, error)** - Retrieve, but do not remove, element from head of queue
-- **Dequeue() (interface{}, error)** - Remove element from head of queue
-- **Size() int** - Get size of queue
-- **Empty() bool** - Returns true if queue is empty
-- **Each() []interface{}** - Returns a new slice pointing containing only the underlying slice values; convinience method
-- **String() string** - String representation of underlying slice values
+- **New() Squeue** - Create a queue
+- **(Squeue) Enqueue(elem interface{})** - Add element to back of queue
+- **(Squeue) Peek () (interface{}, error)** - Retrieve, but do not remove, element from head of queue
+- **(Squeue) Dequeue() (interface{}, error)** - Remove element from head of queue
+- **(Squeue) Size() int** - Get size of queue
+- **(Squeue) Empty() bool** - Returns true if queue is empty
+- **(Squeue) Each() []interface{}** - Returns a new slice pointing containing only the underlying slice values; convinience method
+- **(Squeue) String() string** - String representation of underlying slice values
 
 ## Performance
 
