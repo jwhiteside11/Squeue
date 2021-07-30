@@ -15,13 +15,13 @@ import "github.com/jwhiteside11/squeue"
 
 func someFunctionName() {
 	queue := squeue.New()
-    
+
 	queue.Enqueue("Hello")
 	queue.Enqueue(2)
 	queue.Enqueue("The")
 	queue.Enqueue("World")
 
-    fmt.Println(queue.Peek())
+	fmt.Println(queue.Peek())
 	
 	for _, v := range queue.Each() {
 		fmt.Println(v)
@@ -39,7 +39,7 @@ func someFunctionName() {
 
 ## Available methods
 
-- **New() Squeue {}** - Instantiate a queue
+- **New() Squeue {}** - Create a queue
 - **Enqueue(elem interface{})** - Add element to back of queue
 - **Peek () (interface{}, error)** - Retrieve, but do not remove, element from head of queue
 - **Dequeue() (interface{}, error)** - Remove element from head of queue
@@ -52,10 +52,10 @@ func someFunctionName() {
 
 The slice-based queue implementation is more performant, in both time and memory. The total allocation requirement will be similar between the squeue and linked list queue, but the squeue is generally over twice as fast.
 
-This is because the slice based queue amortizes the time cost of allocation by growing and shrinking the underlying slice as needed. This behavior allows for quicker writes to the data structure, because we don't need to allocate anything in order to add something. The linked list queue must make an allocation every time data is added.
+This is because the squeue amortizes the time cost of allocation by growing and shrinking the underlying slice as needed. This behavior allows for quicker writes to the data structure, because we don't need to allocate anything in order to add something. The linked list queue must make an allocation every time data is added.
 
-The memory concerns present in a slice-based queue implementation have been addressed. The queue discards unused values, and reallocates the underlying slice as the queue gets used. The immediate clean-up saves on total allocation, and the reallocation tells the GC that we are no longer using the slice's underlying array. This way, the queue will not leak memory over time. 
+The memory concerns present in a slice-based queue implementation have been addressed. The squeue discards unused values, and reallocates the underlying slice as the queue gets used. The former saves on total allocation, the latter tells the GC that we are no longer using the slice's underlying array. This way, the queue will not leak memory over time. 
 
 ## Contributions
 
-I'm open to any and all contributions.
+I'm open to any and all contributions. Make a PR.
