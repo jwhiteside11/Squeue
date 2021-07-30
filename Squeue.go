@@ -2,7 +2,6 @@ package squeue
 
 import (
 	"fmt"
-	"strings"
 )
 
 // Squeue - simple queue data structure built with slice internals
@@ -51,6 +50,14 @@ func (sq *Squeue) Enqueue(elem interface{}) {
 	sq.lastIdx++
 }
 
+// Returns first element in queue without removing it
+func (sq *Squeue) Peek() (interface{}, error) {
+	if sq.firstIdx == sq.lastIdx {
+		return nil, fmt.Errorf("no elements remaining in queue")
+	}
+	return sq.squeue[sq.firstIdx], nil
+}
+
 // Remove element from queue (remove first)
 func (sq *Squeue) Dequeue() (interface{}, error) {
 	elem, err := sq.Peek()
@@ -66,12 +73,14 @@ func (sq *Squeue) Dequeue() (interface{}, error) {
 
 }
 
-// Returns first element in queue without removing it
-func (sq *Squeue) Peek() (interface{}, error) {
-	if sq.firstIdx == sq.lastIdx {
-		return nil, fmt.Errorf("no elements remaining in queue")
-	}
-	return sq.squeue[sq.firstIdx], nil
+// Returns length of underlying slice
+func (sq *Squeue) Size() int {
+	return sq.lastIdx - sq.firstIdx
+}
+
+// Returns underlying slice for iteration - convinience method
+func (sq *Squeue) Empty() bool {
+	return sq.Size() == 0
 }
 
 // Returns underlying slice for iteration - convinience method
@@ -79,28 +88,9 @@ func (sq *Squeue) Each() []interface{} {
 	return sq.squeue[sq.firstIdx:sq.lastIdx]
 }
 
-// Returns length of underlying slice
-func (sq *Squeue) Len() int {
-	return sq.lastIdx - sq.firstIdx
-}
-
-// Returns underlying slice for iteration - convinience method
-func (sq *Squeue) Empty() bool {
-	return sq.Len() == 0
-}
-
 // String representation: formats relevant slots of underlying slice as string
 func (sq *Squeue) String() string {
-	var s strings.Builder
-	s.WriteString("[")
-	for _, v := range sq.squeue {
-		if v == nil {
-			continue
-		}
-		s.WriteString(fmt.Sprintf(" %v", v))
-	}
-	s.WriteString(" ]")
-	return s.String()
+	return fmt.Sprint(sq.Each())
 }
 
 // Invoked when backing array reaches capacity
