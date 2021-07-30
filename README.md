@@ -61,8 +61,8 @@ The slice-based queue implementation is more performant than a linked list queue
 
 The squeue is faster because it amortizes the time cost of allocation by growing and shrinking the underlying slice as needed. This behavior allows for quicker writes to the data structure, because we don't need to allocate anything in order to add an element; we simply assign it to a memory address. The linked list queue must spend time allocating each element as they are added. Additionally, the edges between elements in the linked list use O(N) memory, whereas the squeue's two-pointers method uses O(1) memory.
 
-The memory implications of a slice-based queue implementation have been addressed in this module. Unused values are discarded, and the underlying slice reallocates periodically as the queue gets used. The reallocation tells the GC that we are no longer using the slice's old underlying array. This way, the queue will not leak memory over time. Even with the reallocations being made, the total memory allocation of a program using this module is generally lower than the that needed by a program using a linked list as a queue.
+The memory implications of a slice-based queue implementation have been addressed in this module. Unused values are discarded, and the underlying slice reallocates periodically as the queue gets used. The reallocation tells the GC that we are no longer using the slice's old underlying array. This way, the queue will not leak memory over time. Even with the reallocations being made, the total memory allocation required by the queue from this module is generally lower than the that needed by a program using a linked list as a queue.
 
 ## Contributions
 
-I'm open to any and all contributions. Make a PR.
+Please make a PR if interested in contributing. I'm open to any and all contributions. Any help is appreciated!
