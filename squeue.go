@@ -1,4 +1,4 @@
-package main
+package squeue
 
 /*
 Copyright 2021 John D Whiteside
