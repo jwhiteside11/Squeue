@@ -21,7 +21,7 @@ func someFunctionName() {
 	queue.Enqueue("World")
 
     fmt.Println(queue.Peek())
-    
+	
 	for _, v := range queue.Each() {
 		fmt.Println(v)
 	}
