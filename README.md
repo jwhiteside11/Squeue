@@ -6,7 +6,7 @@ Go does not have a built-in queue type. I took to the internet to view common so
 
 This module provides a slice-based queue implementation, hereafter referred to as a squeue, and several common methods for the queue data type.
 
-## Installation
+## Getting Started
 
 You can install this package in your project by running:
 
