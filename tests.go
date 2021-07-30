@@ -46,7 +46,7 @@ func CompareQueues(n ...int) {
 	// Get average difference, std. deviation, print
 	meanRatT := (float64(tS1)/float64(tL1) + float64(tS2)/float64(tL2) + float64(tS3)/float64(tL3)) / 3
 	meanRatM := (float64(mS1)/float64(mL1) + float64(mS2)/float64(mL2) + float64(mS3)/float64(mL3)) / 3
-	fmt.Printf("SliceQueue runs on average in %.2f%% time and %.2fs%% memory of a LinkedQueue\n", meanRatT, meanRatM)
+	fmt.Printf("SliceQueue runs on average in %.2f%% time and %.2fs%% memory of a LinkedQueue\n", meanRatT*100, meanRatM*100)
 }
 
 func ladderSQTest() (int64, uint64) {
@@ -66,7 +66,7 @@ func ladderSQTest() (int64, uint64) {
 	endT, endM := runtimeStats()
 
 	elapsed, used := endT-startT, uint64(endM-startM)
-	fmt.Printf("SliceQueue: %vns, used ~%vKB\n", elapsed, used/1000)
+	fmt.Printf("SliceQueue ladder: %vns, used ~%vKB\n", elapsed, used/1000)
 
 	return elapsed, used
 }
@@ -89,7 +89,7 @@ func ladderLLQTest() (int64, uint64) {
 	endT, endM := runtimeStats()
 
 	elapsed, used := endT-startT, uint64(endM-startM)
-	fmt.Printf("SliceQueue: %vns, used ~%vKB\n", elapsed, used/1000)
+	fmt.Printf("LinkedQueue ladder: %vns, used ~%vKB\n", elapsed, used/1000)
 
 	return elapsed, used
 }
@@ -106,7 +106,7 @@ func pushPopSQTest() (int64, uint64) {
 	endT, endM := runtimeStats()
 
 	elapsed, used := endT-startT, uint64(endM-startM)
-	fmt.Printf("SliceQueue: %vns, used ~KB%v\n", elapsed, used/1000)
+	fmt.Printf("SliceQueue pushpop: %vns, used ~%vKB\n", elapsed, used/1000)
 
 	return elapsed, used
 }
@@ -124,7 +124,7 @@ func pushPopLLQTest() (int64, uint64) {
 	endT, endM := runtimeStats()
 
 	elapsed, used := endT-startT, uint64(endM-startM)
-	fmt.Printf("SliceQueue: %vns, used ~KB%v\n", elapsed, used/1000)
+	fmt.Printf("LinkedQueue pushpop: %vns, used ~%vKB\n", elapsed, used/1000)
 
 	return elapsed, used
 }
@@ -143,7 +143,7 @@ func linearSQTest() (int64, uint64) {
 	endT, endM := runtimeStats()
 
 	elapsed, used := endT-startT, uint64(endM-startM)
-	fmt.Printf("SliceQueue: %vns, used ~%vKB\n", elapsed, used/1000)
+	fmt.Printf("SliceQueue linear: %vns, used ~%vKB\n", elapsed, used/1000)
 
 	return elapsed, used
 }
@@ -163,7 +163,7 @@ func linearLLQTest() (int64, uint64) {
 	endT, endM := runtimeStats()
 
 	elapsed, used := endT-startT, endM-startM
-	fmt.Printf("LinkedQueue: %vns, used ~%vKB\n", elapsed, used/1000)
+	fmt.Printf("LinkedQueue linear: %vns, used ~%vKB\n", elapsed, used/1000)
 
 	return elapsed, used
 }
