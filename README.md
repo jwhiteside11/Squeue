@@ -1,4 +1,4 @@
-# Squeue - Slice-based queue in Go
+# Squeue - Slice-based queue
 
 ## Installation
 
@@ -15,6 +15,7 @@ import "github.com/jwhiteside11/squeue"
 
 func someFunctionName() {
 	queue := squeue.New()
+    
 	queue.Enqueue("Hello")
 	queue.Enqueue(2)
 	queue.Enqueue("The")
