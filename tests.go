@@ -1,4 +1,4 @@
-package tests
+package main
 
 import (
 	"container/list"
@@ -7,15 +7,13 @@ import (
 	"math"
 	"runtime"
 	"time"
-
-	"github.com/jwhiteside11/squeue"
 )
 
 var mem runtime.MemStats
 var scale int = 10000
 
 func Example() {
-	queue := squeue.New()
+	queue := New()
 	queue.Enqueue("Hello")
 	queue.Enqueue(2)
 	queue.Enqueue("The")
@@ -54,7 +52,7 @@ func CompareQueues(n ...int) {
 func ladderSQTest() (int64, uint64) {
 	startT, startM := runtimeStats()
 
-	qq := squeue.New()
+	qq := New()
 	n := int(math.Sqrt(float64(scale)))
 	for i := 0; i < n; i++ {
 		for j := 0; j < n-i; j++ {
@@ -99,7 +97,7 @@ func ladderLLQTest() (int64, uint64) {
 func pushPopSQTest() (int64, uint64) {
 	startT, startM := runtimeStats()
 
-	qq := squeue.New()
+	qq := New()
 	for i := 0; i < scale; i++ {
 		qq.Enqueue(i)
 		qq.Dequeue()
@@ -134,7 +132,7 @@ func pushPopLLQTest() (int64, uint64) {
 func linearSQTest() (int64, uint64) {
 	startT, startM := runtimeStats()
 
-	qq := squeue.New()
+	qq := New()
 	for i := 0; i < scale; i++ {
 		qq.Enqueue(i)
 	}
@@ -190,7 +188,7 @@ func testArrayQueue() (int64, uint64) {
 	start1T := time.Now().UnixNano()
 	start1M := mem.TotalAlloc
 
-	qq := squeue.New()
+	qq := New()
 	for i := 0; i < 10000; i++ {
 		qq.Enqueue(i)
 	}
