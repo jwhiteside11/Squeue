@@ -49,8 +49,8 @@ type Squeue struct {
 // Constructor - convinience method
 func New(initial ...interface{}) Squeue {
 	n, m := len(initial), len(initial)
-	if m < 50 {
-		m = 50
+	if m < 10 {
+		m = 10
 	}
 	qq := make([]interface{}, 2*m)
 	copy(qq, initial)
@@ -112,8 +112,8 @@ func (sq *Squeue) String() string {
 // Invoked when backing array reaches capacity
 func (sq *Squeue) grow() {
 	n := cap(sq.squeue)
-	if n < 5 {
-		n = 5
+	if n < 15 {
+		n = 15
 	}
 	m := 2 * n
 	sq.resize(m)
@@ -123,8 +123,8 @@ func (sq *Squeue) grow() {
 func (sq *Squeue) shrink() {
 	n := cap(sq.squeue)
 	// For small n, place values at beginning of larger slice
-	if n <= 50 {
-		sq.resize(50)
+	if n <= 30 {
+		sq.resize(30)
 		return
 	}
 	// Resize slice to 3/4 capacity
