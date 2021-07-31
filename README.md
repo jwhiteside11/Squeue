@@ -67,7 +67,7 @@ Amortization is acheived by growing and shrinking the underlying slice when its 
 
 The squeue is also a more lightweight data structure; the edges between elements in the linked list use **O(N)** memory, whereas the squeue's two-pointer technique uses **O(1)** memory. Even with the reallocations being made, the total memory allocated by the program using a squeue is generally less than that needed by a program using a linked list as a queue.
 
-This module was originally built to prevent memory leakage in a slice-based queue implementation. It does this by discarding unused values from the queue, and also by reallocating the underlying slice periodically as the queue gets used. The reallocation tells the GC that we are no longer using the slice's old underlying array, and discarding the value does much the same. This way, the queue will not leak memory over time.
+This module was originally built to hinder the memory leakage existent in a slice-based queue implementation. It accomplishes this by discarding unused values from the queue, and also by reallocating the underlying slice periodically as the queue gets used. The reallocation tells the GC that we are no longer using the slice's old underlying array, and discarding the value does much the same. This way, the queue will not leak memory over time.
 
 ## Contributions
 
