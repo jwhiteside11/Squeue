@@ -60,7 +60,7 @@ func New(initial ...interface{}) Squeue {
 	copy(qq, initial)
 	//inner := &InnerQueue{qq, 0, n}
 
-	outer := make([]*[]interface{}, 10)
+	outer := make([]*[]interface{}, 6)
 	outer[0] = &qq
 
 	return Squeue{outer, qq, nil, 0, n, 0, 0, 0, 1, n}
@@ -71,7 +71,7 @@ func New(initial ...interface{}) Squeue {
 func (sq *Squeue) Enqueue(elem interface{}) {
 	if sq.tail == nil {
 		if sq.headL == sq.headF && sq.head[sq.headL] != nil {
-			inner := make([]interface{}, 2*sq.Size())
+			inner := make([]interface{}, 2*len(sq.head))
 			sq.outerQ[sq.lastIdx] = &inner
 			// Set tail, pointers
 			sq.tail = inner
@@ -85,13 +85,15 @@ func (sq *Squeue) Enqueue(elem interface{}) {
 	} else {
 		if sq.tailL == sq.tailF && sq.tail[sq.tailL] != nil {
 			sq.size += len(sq.tail)
-			inner := make([]interface{}, 2*sq.Size())
+			inner := make([]interface{}, 2*len(sq.tail))
 			sq.outerQ[sq.lastIdx] = &inner
 			// Set tail, pointers
 			sq.tail = inner
 			sq.tailF, sq.tailL = 0, 0
 			sq.lastIdx = (sq.lastIdx + 1) % len(sq.outerQ)
+			//fmt.Println(sq.outerQ, sq.firstIdx, sq.lastIdx, sq.outerQ[sq.lastIdx] != nil)
 			if sq.lastIdx == sq.firstIdx && sq.outerQ[sq.lastIdx] != nil {
+				//fmt.Println("GROW COND")
 				sq.grow()
 			}
 		}
@@ -194,13 +196,15 @@ func (sq *Squeue) String() string {
 // Resize slice to double the number of elements in the queue
 // For small n, place values at beginning of larger slice to prevent unnecessary allocations
 func (sq *Squeue) grow() {
-	fmt.Println("GROW")
+	//fmt.Println("GROW")
 	n := cap(sq.outerQ)
 	if n < 6 {
 		sq.resize(8)
 	} else {
 		sq.resize(2 * n)
 	}
+
+	//fmt.Println("AFTER GROW", sq.outerQ, sq.firstIdx, sq.lastIdx)
 }
 
 // Allocates a new slice
@@ -214,6 +218,7 @@ func (sq *Squeue) resize(m int) {
 	j := 0
 	if sq.firstIdx == 0 {
 		copy(qq, sq.outerQ)
+		sq.lastIdx = len(sq.outerQ)
 		sq.outerQ = qq
 		return
 	}
