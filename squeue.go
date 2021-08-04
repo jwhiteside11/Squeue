@@ -43,40 +43,87 @@ import (
 // Squeue type
 // Uses an underlying slice and two pointers to emulate a queue
 type Squeue struct {
-	squeue            []interface{} // slice of elements
-	firstIdx, lastIdx int           // index of first element, first available slot
+	outerQ                     []*[]interface{} // slice of elements
+	head, tail                 []interface{}
+	headF, headL, tailF, tailL int
+	firstIdx, lastIdx, size    int // index of first element, first available slot
 }
 
 // Constructor - convinience method
 // Accepts initial values to be enqueued, in the order listed
 func New(initial ...interface{}) Squeue {
 	n, m := len(initial), len(initial)
-	if m < 5 {
-		m = 5
+	if m < 10 {
+		m = 10
 	}
 	qq := make([]interface{}, 2*m)
 	copy(qq, initial)
-	return Squeue{qq, 0, n}
+	//inner := &InnerQueue{qq, 0, n}
+
+	outer := make([]*[]interface{}, 10)
+	outer[0] = &qq
+
+	return Squeue{outer, qq, nil, 0, n, 0, 0, 0, 1, n}
 }
 
 // Add element to queue
 // Adds element to tail, increments tail pointer
 func (sq *Squeue) Enqueue(elem interface{}) {
-	if sq.lastIdx == cap(sq.squeue) {
-		sq.refresh()
+	if sq.tail == nil {
+		if sq.headL == sq.headF && sq.head[sq.headL] != nil {
+			inner := make([]interface{}, 2*sq.Size())
+			sq.outerQ[sq.lastIdx] = &inner
+			// Set tail, pointers
+			sq.tail = inner
+			sq.tailF, sq.tailL = 0, 0
+			sq.lastIdx = (sq.lastIdx + 1) % len(sq.outerQ)
+		} else {
+			sq.head[sq.headL] = elem
+			sq.headL = (sq.headL + 1) % len(sq.head)
+			return
+		}
+	} else {
+		if sq.tailL == sq.tailF && sq.tail[sq.tailL] != nil {
+			sq.size += len(sq.tail)
+			inner := make([]interface{}, 2*sq.Size())
+			sq.outerQ[sq.lastIdx] = &inner
+			// Set tail, pointers
+			sq.tail = inner
+			sq.tailF, sq.tailL = 0, 0
+			sq.lastIdx = (sq.lastIdx + 1) % len(sq.outerQ)
+			if sq.lastIdx == sq.firstIdx && sq.outerQ[sq.lastIdx] != nil {
+				sq.grow()
+			}
+		}
 	}
-	sq.squeue[sq.lastIdx] = elem
-	sq.lastIdx++
+	sq.tail[sq.tailL] = elem
+	sq.tailL = (sq.tailL + 1) % len(sq.tail)
 }
 
 // Retrieve element from queue without removing it
 // Checks for empty queue, if not returns first elem
 func (sq *Squeue) Peek() (interface{}, error) {
-	// If pointers are the same, the queue is empty; return nil, error
-	if sq.firstIdx == sq.lastIdx {
-		return nil, fmt.Errorf("no elements remaining in queue")
+	// Check for elem in head queue
+	elem := sq.head[sq.headF]
+	// If not there, move to next queue until only head left
+	if elem == nil {
+		disp := (sq.firstIdx + 1) % len(sq.outerQ)
+		if sq.outerQ[disp] == nil {
+			return nil, fmt.Errorf("no elements remaining in queue")
+		}
+		sq.outerQ[sq.firstIdx] = nil
+		sq.firstIdx = disp
+		sq.head = (*sq.outerQ[sq.firstIdx])
+		if sq.outerQ[sq.firstIdx] == &sq.tail {
+			sq.headF, sq.headL = sq.tailF, sq.tailL
+			sq.tail = nil
+		} else {
+			sq.size -= len(sq.head)
+			sq.headF, sq.headL = 0, 0
+		}
+		return sq.Peek()
 	}
-	return sq.squeue[sq.firstIdx], nil
+	return elem, nil
 }
 
 // Remove element from queue
@@ -87,15 +134,42 @@ func (sq *Squeue) Dequeue() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	sq.squeue[sq.firstIdx] = nil
-	sq.firstIdx++
+	// Void element, move head pointer
+	sq.head[sq.headF] = nil
+	sq.headF = (sq.headF + 1) % len(sq.head)
 	return elem, nil
-
 }
 
 // Returns number of elements in queue
 func (sq *Squeue) Size() int {
-	return sq.lastIdx - sq.firstIdx
+	total := sq.size
+	if sq.head != nil {
+		f1, f2 := sq.headF, sq.headL
+		switch {
+		case f1 < f2:
+			total += f2 - f1
+		case f1 > f2:
+			total += len(sq.head) - f1 + f2
+		default:
+			if sq.head[f1] != nil {
+				total += len(sq.head)
+			}
+		}
+	}
+	if sq.tail != nil {
+		l1, l2 := sq.tailF, sq.tailL
+		switch {
+		case l1 < l2:
+			total += l2 - l1
+		case l1 > l2:
+			total += len(sq.tail) - l1 + l2
+		default:
+			if sq.tail[l1] != nil {
+				total += len(sq.tail)
+			}
+		}
+	}
+	return total
 }
 
 // Returns true if queue is empty
@@ -105,7 +179,11 @@ func (sq *Squeue) Empty() bool {
 
 // Returns underlying slice for iteration - convinience method
 func (sq *Squeue) Each() []interface{} {
-	return sq.squeue[sq.firstIdx:sq.lastIdx]
+	s := make([]interface{}, 0)
+	for _, q := range sq.outerQ {
+		s = append(s, *q...)
+	}
+	return s
 }
 
 // String representation: formats relevant slots of underlying slice as string
@@ -113,51 +191,12 @@ func (sq *Squeue) String() string {
 	return fmt.Sprint(sq.Each())
 }
 
-// Rewrite slice based on current array utilization
-func (sq *Squeue) refresh() {
-	lenq, capq := sq.Size(), cap(sq.squeue)
-	// Three cases: stack too big, stack ok, stack too small
-	switch {
-	// Stack big for underlying slice
-	case (3 * lenq) > (2 * capq):
-		sq.grow()
-	// Stack ok for underlying slice
-	case (4 * lenq) > capq:
-		sq.reset()
-	// Stack small for underlying slice
-	default:
-		sq.shrink()
-	}
-}
-
-// Uses the existing slice
-// Swaps elements to the beginning of the slice
-// Reconfigures pointers to reflect shift
-func (sq *Squeue) reset() {
-	// Use existing slice
-	qq := sq.squeue
-	// Copy existing values to beginning of new slice
-	j := 0
-	for i := sq.firstIdx; i < sq.lastIdx; i++ {
-		qq[j], qq[i] = qq[i], qq[j]
-		j++
-	}
-	// Set pointers
-	sq.firstIdx = 0
-	sq.lastIdx = j
-}
-
-// Resize slice to double the number of elements in the queue
-func (sq *Squeue) grow() {
-	n := sq.Size()
-	sq.resize(2 * n)
-}
-
 // Resize slice to double the number of elements in the queue
 // For small n, place values at beginning of larger slice to prevent unnecessary allocations
-func (sq *Squeue) shrink() {
-	n := sq.Size()
-	if n < 5 {
+func (sq *Squeue) grow() {
+	fmt.Println("GROW")
+	n := cap(sq.outerQ)
+	if n < 6 {
 		sq.resize(8)
 	} else {
 		sq.resize(2 * n)
@@ -169,16 +208,27 @@ func (sq *Squeue) shrink() {
 // Reconfigures pointers to reflect shift
 func (sq *Squeue) resize(m int) {
 	// Allocate new slice
-	qq := make([]interface{}, m)
+	//fmt.Println("RESIZE CALLED", len(sq.outerQ), m, sq.firstIdx, sq.lastIdx)
+	qq := make([]*[]interface{}, m)
 	// Copy existing values to beginning of new slice
 	j := 0
-	for i := sq.firstIdx; i < sq.lastIdx; i++ {
-		qq[j] = sq.squeue[i]
+	if sq.firstIdx == 0 {
+		copy(qq, sq.outerQ)
+		sq.outerQ = qq
+		return
+	}
+	lenq := len(sq.outerQ)
+	for i := sq.firstIdx; i < lenq; i++ {
+		qq[j] = sq.outerQ[i]
+		j++
+	}
+	for i := 0; i < sq.lastIdx; i++ {
+		qq[j] = sq.outerQ[i]
 		j++
 	}
 	// Set pointers
 	sq.firstIdx = 0
 	sq.lastIdx = j
 	// Set underlying slice as newly allocated slice
-	sq.squeue = qq
+	sq.outerQ = qq
 }
