@@ -3,6 +3,7 @@ package squeue
 import (
 	"container/list"
 	"fmt"
+	"log"
 	"math"
 	"runtime"
 	"time"
@@ -20,25 +21,38 @@ import (
 // It is demonstrable that the squeue does have edge cases, but the average
 // case is much more favorable than a linked list queue.
 
-var mem runtime.MemStats
-var scale int = 10000
-
 func Example() {
 	queue := New()
-	queue.Enqueue("Hello")
-	queue.Enqueue(2)
-	queue.Enqueue("The")
-	queue.Enqueue("World")
-	for _, v := range queue.Each() {
-		fmt.Println(v)
-	}
+
+	// Use as queue
+	queue.Push("Hello")
+	queue.Push("World")
+	el, _ := queue.Unshift()
+	fmt.Println(el) // el == "Hello"
+
+	// Use as deque
+	queue.Shift("Hello")
+	queue.Push("Welcome!")
+	queue.Push(2)
+	el, _ = queue.Pop()
+	fmt.Println(el) // el == 2
+
+	// Get element w/o removal
+	queue.Shift("First")
+	queue.Push("Last")
+	fmt.Println(queue.PeekFront())
+	fmt.Println(queue.PeekBack())
+
+	// Iterate through elements in queue until queue is empty
 	for !queue.Empty() {
-		queue.Dequeue()
+		el, _ := queue.Unshift()
+		fmt.Println(el)
 	}
 
-	_, err := queue.Dequeue()
+	// Catch error from delete operation (Unshift/Pop)
+	_, err := queue.Pop()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 }
 
@@ -70,6 +84,10 @@ func CompareQueues(n ...int) {
 	fmt.Printf("SliceQueue runs on average in %.2f%% time and %.2fs%% memory of a LinkedQueue\n\n", meanRatT*100, meanRatM*100)
 }
 
+var mem runtime.MemStats
+var scale int = 10000
+var mod int = 7
+
 func SQTest(m ...int) (int64, uint64) {
 	if len(m) > 0 {
 		scale = m[0]
@@ -79,26 +97,47 @@ func SQTest(m ...int) (int64, uint64) {
 	qq := New()
 	// Linear
 	for i := 0; i < scale; i++ {
-		qq.Enqueue(i)
+		if i%(mod-2) == 0 {
+			qq.Shift(i)
+			continue
+		}
+		qq.Push(i)
 	}
 	for i := 0; i < scale; i++ {
-		qq.Dequeue()
+		if i%(mod-6) == 0 {
+			qq.Unshift()
+			continue
+		}
+		qq.Pop()
 	}
 
 	// PushPop
 	for i := 0; i < scale; i++ {
-		qq.Enqueue(i)
-		qq.Dequeue()
+		if i%(mod-3) == 0 {
+			qq.Shift(i)
+			qq.Pop()
+			continue
+		}
+		qq.Push(i)
+		qq.Unshift()
 	}
 
 	// UpDown
 	n := scale / 10
 	for i := 0; i < n; i++ {
 		for j := 0; j < 10; j++ {
-			qq.Enqueue(i)
+			if i%(mod-3) == 0 {
+				qq.Shift(i)
+				continue
+			}
+			qq.Push(i)
 		}
 		for j := 0; j < 10; j++ {
-			qq.Dequeue()
+			if i%(mod-2) == 0 {
+				qq.Unshift()
+				continue
+			}
+			qq.Pop()
 		}
 	}
 
@@ -106,10 +145,18 @@ func SQTest(m ...int) (int64, uint64) {
 	n = int(math.Sqrt(float64(scale)))
 	for i := 0; i < n; i++ {
 		for j := 0; j < n-i; j++ {
-			qq.Enqueue(i)
+			if i%(mod-3) == 0 {
+				qq.Shift(i)
+				continue
+			}
+			qq.Push(i)
 		}
 		for j := 0; j <= i; j++ {
-			qq.Dequeue()
+			if i%(mod-2) == 0 {
+				qq.Unshift()
+				continue
+			}
+			qq.Pop()
 		}
 	}
 
@@ -130,17 +177,32 @@ func LLQTest(m ...int) (int64, uint64) {
 	ll := list.New()
 	// Linear
 	for i := 0; i < scale; i++ {
+		if i%(mod-3) == 0 {
+			ll.PushFront(i)
+			continue
+		}
 		ll.PushBack(i)
 	}
 	for i := 0; i < scale; i++ {
-		e := ll.Front() // First element
+		if i%(mod-6) == 0 {
+			e := ll.Front()
+			ll.Remove(e)
+			continue
+		}
+		e := ll.Back()
 		ll.Remove(e)
 	}
 
 	// PushPop
 	for i := 0; i < scale; i++ {
+		if i%(mod-2) == 0 {
+			ll.PushFront(i)
+			e := ll.Front()
+			ll.Remove(e)
+			continue
+		}
 		ll.PushBack(i)
-		e := ll.Front() // First element
+		e := ll.Back()
 		ll.Remove(e)
 	}
 
@@ -148,10 +210,19 @@ func LLQTest(m ...int) (int64, uint64) {
 	n := scale / 10
 	for i := 0; i < n; i++ {
 		for j := 0; j < 10; j++ {
+			if i%(mod-3) == 0 {
+				ll.PushFront(i)
+				continue
+			}
 			ll.PushBack(i)
 		}
 		for j := 0; j < 10; j++ {
-			e := ll.Front()
+			if i%(mod-2) == 0 {
+				e := ll.Front()
+				ll.Remove(e)
+				continue
+			}
+			e := ll.Back()
 			ll.Remove(e)
 		}
 	}
@@ -160,10 +231,19 @@ func LLQTest(m ...int) (int64, uint64) {
 	n = int(math.Sqrt(float64(scale)))
 	for i := 0; i < n; i++ {
 		for j := 0; j < n-i; j++ {
+			if i%(mod-3) == 0 {
+				ll.PushFront(i)
+				continue
+			}
 			ll.PushBack(i)
 		}
 		for j := 0; j <= i; j++ {
-			e := ll.Front() // First element
+			if i%(mod-2) == 0 {
+				e := ll.Front()
+				ll.Remove(e)
+				continue
+			}
+			e := ll.Back()
 			ll.Remove(e)
 		}
 	}
@@ -183,10 +263,10 @@ func upDownSQTest() (int64, uint64) {
 	n := scale / 10
 	for i := 0; i < n; i++ {
 		for j := 0; j < 10; j++ {
-			qq.Enqueue(i)
+			qq.Push(i)
 		}
 		for j := 0; j < 10; j++ {
-			qq.Dequeue()
+			qq.Unshift()
 		}
 	}
 
@@ -226,10 +306,10 @@ func ladderSQTest() (int64, uint64) {
 	n := int(math.Sqrt(float64(scale)))
 	for i := 0; i < n; i++ {
 		for j := 0; j < n-i; j++ {
-			qq.Enqueue(i)
+			qq.Push(i)
 		}
 		for j := 0; j <= i; j++ {
-			qq.Dequeue()
+			qq.Unshift()
 		}
 	}
 
@@ -250,7 +330,7 @@ func ladderLLQTest() (int64, uint64) {
 			ll.PushBack(i)
 		}
 		for j := 0; j <= i; j++ {
-			e := ll.Front() // First element
+			e := ll.Front()
 			ll.Remove(e)
 		}
 	}
@@ -267,8 +347,8 @@ func pushPopSQTest() (int64, uint64) {
 
 	qq := New()
 	for i := 0; i < scale; i++ {
-		qq.Enqueue(i)
-		qq.Dequeue()
+		qq.Push(i)
+		qq.Unshift()
 	}
 
 	endT, endM := runtimeStats()
@@ -284,7 +364,7 @@ func pushPopLLQTest() (int64, uint64) {
 	ll := list.New()
 	for i := 0; i < scale; i++ {
 		ll.PushBack(i)
-		e := ll.Front() // First element
+		e := ll.Front()
 		ll.Remove(e)
 	}
 
@@ -300,10 +380,10 @@ func linearSQTest() (int64, uint64) {
 
 	qq := New()
 	for i := 0; i < scale; i++ {
-		qq.Enqueue(i)
+		qq.Push(i)
 	}
 	for i := 0; i < scale; i++ {
-		qq.Dequeue()
+		qq.Unshift()
 	}
 
 	endT, endM := runtimeStats()
@@ -321,7 +401,7 @@ func linearLLQTest() (int64, uint64) {
 		ll.PushBack(i)
 	}
 	for i := 0; i < scale; i++ {
-		e := ll.Front() // First element
+		e := ll.Front()
 		ll.Remove(e)
 	}
 

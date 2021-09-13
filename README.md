@@ -2,9 +2,11 @@
 
 Go does not have a built-in queue data type. Upon learning this, I took to the internet to view common solutions for this. I found that there were two that were widely used:
 - 1) Use a slice; the append method handles adding to the queue, removing is done with the slicing syntax. This works well, but the internals give rise to memory concerns.
-- 2) Use a linked list; Go provides a built-in container/list module with a doubly-linked list implementation. This is a great thing, but it is more information than we need to implement a queue. Therefore, it's going to be underoptimized.
+- 2) Use a linked list; Go provides a built-in module with a doubly-linked list implementation. This is an fine answer, but a bit naive for my taste. 
 
-This module provides a slice-based queue implementation, hereafter referred to as a squeue, and several common methods for the queue data type.
+I began creating a slice-backed queue data type in Go, and what I ended up with was a unique data structure. Backed by slices, it uses circular queue behaviors with a nested array structure to outperform other queue implementation in both time and memory. I would love more feedback on its performance vs. other queues available in Go and other languages.
+
+This module offers a Go implementation of that data structure, along with several common methods for the queue data type. Enjoy.
 
 ## Getting Started
 
@@ -19,55 +21,67 @@ and then use it in your project like so:
 ```go
 import "github.com/jwhiteside11/squeue"
 
-func someFunctionName() {
+func someFunction() {
 	queue := squeue.New()
 
-	queue.Enqueue("Hello")
-	queue.Enqueue(2)
-	queue.Enqueue("The")
-	queue.Enqueue("World")
+    // Use as queue
+	queue.Push("Hello")
+	queue.Push("World")
+    el, _ := queue.Unshift()
+    fmt.Println(el) // el == "Hello"
 
-	fmt.Println(queue.Peek())
-	
-	for _, v := range queue.Each() {
-		fmt.Println(v)
-	}
+    // Use as deque
+	queue.Shift("Hello")
+    queue.Push("Welcome!")
+    queue.Push(2)
+    el, _ := queue.Pop()
+    fmt.Println(el) // el == 2
 
+
+    // Get element w/o removal
+	queue.Shift("First")
+	queue.Push("Last")
+	fmt.Println(queue.PeekFront())
+	fmt.Println(queue.PeekBack())
+
+    // Iterate through elements in queue until queue is empty
 	for !queue.Empty() {
-		queue.Dequeue()
+		el, _ := queue.Unshift()
+        fmt.Println(el)
 	}
-	
-	_, err := queue.Dequeue()
+
+	// Iterate (slower than the above dequeueing pattern)
+	for _, v := range queue.Each() {
+        // do something with elem
+	}
+
+    // Catch error from delete operation (Unshift/Pop)
+	_, err := queue.Pop()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 }
 ```
 
 ## Available methods
 
-- **New(elems ...interface{}) Squeue** - Create a queue
-- **(queue Squeue) Enqueue(elem interface{})** - Add element to back of queue
-- **(queue Squeue) Peek () (interface{}, error)** - Retrieve, but do not remove, element from head of queue
-- **(queue Squeue) Dequeue() (interface{}, error)** - Remove element from head of queue
+- **New(elems ...interface{}) Squeue** - Create a new double-ended queue
+- **(queue Squeue) Push(elem interface{})** - Add element to back of queue (enqueue)
+- **(queue Squeue) Pop() (interface{}, error)** - Remove the last element from the queue
+- **(queue Squeue) Shift(elem interface{})** - Add element to front of queue
+- **(queue Squeue) Unshift() (interface{}, error)** - Remove the first element from the queue (dequeue)
+- **(queue Squeue) PeekFront() (interface{}, error)** - Retrieve, but do not remove, the first element of the queue
+- **(queue Squeue) PeekBack() (interface{}, error)** - Retrieve, but do not remove, the last element of the queue
 - **(queue Squeue) Size() int** - Get size of queue
 - **(queue Squeue) Empty() bool** - Returns true if queue is empty
-- **(queue Squeue) Each() []interface{}** - Returns a new slice containing only the underlying slice values; convinience method
-- **(queue Squeue) String() string** - String representation of underlying slice values
+- **(queue Squeue) Each() []interface{}** - Returns a new slice containing elements in queue order; convinience method
+- **(queue Squeue) String() string** - String representation of queue
 
 ## Performance
 
-The slice-based queue implementation is generally more performant than a linked list-based queue, in both time and memory. The performance gains are had by decreasing memory complexity, and amortizing the time expense of memory allocation. The performance improves as the throughput of the queue grows.
+This queue implementation is generally more performant than a linked list-based queue and a common circular array queue, in both time and memory. The performance improves as the throughput of the queue grows.
 
-For small throughput (n < 50), a linked list is generally faster. For large throughput (n > 1000), the squeue is generally faster (50% time req). For very large throughput (n > 10^6), the edge cases are few, and this implementation becomes highly performant. This can be verified using the included test file.
-
-For data analysis or high-load applications, the time and memory requirements of this queue implementation are highly desirable.
-
-Amortization is acheived by growing and shrinking the underlying slice when its capacity is reached. This behavior allows for quicker writes to the data structure, because generally we don't need to allocate anything in order to add an element; we simply assign it to a memory address. The linked list queue, on the other hand, must allocate a new node for each element as they are added.
-
-The squeue is also a more lightweight data structure; the edges between elements in the linked list use **O(N)** memory, whereas the squeue's two-pointer technique uses **O(1)** memory. Even with the reallocations being made, the total memory allocated by the program using a squeue is generally less than that needed by a program using a linked list as a queue.
-
-This module was originally built to prevent memory in a slice-based queue implementation. It does this by discarding unused values from the queue, and also by reallocating the underlying slice periodically as the queue gets used. The reallocation tells the GC that we are no longer using the slice's old underlying array, and discarding the value does much the same. This way, the queue will not leak memory over time.
+For small throughput (n < 100), a linked list is generally faster. This implementation seeks to eliminate the edge cases present in more common circular queue implementations, so for n > 100, there are very few cases where it is beaten by a linked list in any capacity. For very large throughput (n > 10^6), it's not even close. This can be verified using the included test file.
 
 ## Contributions
 
