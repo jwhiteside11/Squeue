@@ -83,6 +83,8 @@ This queue implementation is generally more performant than a linked list-based 
 
 For small throughput (n < 100), a linked list is generally faster. This implementation seeks to eliminate the edge cases present in more common circular queue implementations, so for n > 100, there are very few cases where it is beaten by a linked list in any capacity. For very large throughput (n > 10^6), it's not even close. This can be verified using the included test file.
 
+This module was originally built to hinder the memory leakage existent in a slice-based queue implementation. It accomplishes this by discarding unused values from the queue, and also by reallocating the underlying slice periodically as the queue gets used. The reallocation tells the GC that we are no longer using the slice's old underlying array, and discarding the value does much the same. This way, the queue will not leak memory over time. Analysis of runtime memory of long-standing use-cases confirm this.
+
 ## Contributions
 
 This is an ongoing open-source project, open to any and all contributions. Any help is appreciated!
