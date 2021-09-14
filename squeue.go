@@ -527,22 +527,22 @@ func (sq *Squeue) appendCache(s []interface{}) []interface{} {
 	switch {
 	case sq.cacheF < sq.cacheL:
 		for i := sq.cacheF + 1; i < sq.cacheL-1; i++ {
-			sq.appendInner(s, i)
+			s = sq.appendCacheInner(s, i)
 		}
 	default:
 		lenQ := len(sq.cache)
 		for i := sq.cacheF + 1; i < lenQ; i++ {
-			sq.appendInner(s, i)
+			s = sq.appendCacheInner(s, i)
 		}
 		for i := 0; i < sq.cacheL-1; i++ {
-			sq.appendInner(s, i)
+			s = sq.appendCacheInner(s, i)
 		}
 	}
 	return s
 }
 
 // appendCache util
-func (sq *Squeue) appendInner(s []interface{}, i int) []interface{} {
+func (sq *Squeue) appendCacheInner(s []interface{}, i int) []interface{} {
 	q, p := *(sq.cache[i].ptr), sq.cache[i].idx
 	lenq := len(q)
 	for j := p; j < lenq; j++ {
