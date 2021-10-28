@@ -28,14 +28,14 @@ func someFunction() {
     queue.Push("Hello")
     queue.Push("World")
     el, _ := queue.Unshift()
-    fmt.Println(el) // el == "Hello"
+    fmt.Println(el) // "Hello"
 
     // Use as deque
     queue.Shift("Hello")
     queue.Push("Welcome!")
     queue.Push(2)
     el, _ := queue.Pop()
-    fmt.Println(el) // el == 2
+    fmt.Println(el) // 2
 
 
     // Get element w/o removal
