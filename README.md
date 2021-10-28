@@ -22,16 +22,16 @@ and then use it in your project like so:
 import "github.com/jwhiteside11/squeue"
 
 func someFunction() {
-	queue := squeue.New()
+    queue := squeue.New()
 
     // Use as queue
-	queue.Push("Hello")
-	queue.Push("World")
+    queue.Push("Hello")
+    queue.Push("World")
     el, _ := queue.Unshift()
     fmt.Println(el) // el == "Hello"
 
     // Use as deque
-	queue.Shift("Hello")
+    queue.Shift("Hello")
     queue.Push("Welcome!")
     queue.Push(2)
     el, _ := queue.Pop()
@@ -39,27 +39,27 @@ func someFunction() {
 
 
     // Get element w/o removal
-	queue.Shift("First")
-	queue.Push("Last")
-	fmt.Println(queue.PeekFront())
-	fmt.Println(queue.PeekBack())
+    queue.Shift("First")
+    queue.Push("Last")
+    fmt.Println(queue.PeekFront()) // "First"
+    fmt.Println(queue.PeekBack()) // "Last"
 
     // Iterate through elements in queue until queue is empty
-	for !queue.Empty() {
-		el, _ := queue.Unshift()
+    for !queue.Empty() {
+        el, _ := queue.Unshift()
         fmt.Println(el)
-	}
+    }
 
-	// Iterate (slower than the above dequeueing pattern)
-	for _, v := range queue.Each() {
+    // Iterate (slower than the above dequeueing pattern)
+    for _, v := range queue.Each() {
         // do something with elem
-	}
+    }
 
     // Catch error from delete operation (Unshift/Pop)
-	_, err := queue.Pop()
-	if err != nil {
-		log.Fatal(err)
-	}
+    _, err := queue.Pop()
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 ```
 

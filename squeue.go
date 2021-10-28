@@ -24,7 +24,7 @@ import (
 // 			Built in Go with slice internals
 //
 // Memory concerns involving slice-based queues have been handled:
-// 	- Values are set to nil once no longer needed
+//  - Values are set to nil once no longer needed
 //  - Both the outer and underlying slices behave circularly, so
 //    they both only need grow at full slice utilization.
 //  - When an inner queue reaches capacity, it creates a new
@@ -36,7 +36,7 @@ import (
 //    into a bigger slice. The values at the pointers are untouched.
 //  - At no point does the program allow for growth of slices beyond
 //    what is needed, and the memory provided by the slices is
-//	  utilized maximally as elements are added and removed (due to
+//    utilized maximally as elements are added and removed (due to
 //    circular behavior). Dynamic growth/allocations and optimal
 //    utilization of the slices prevents any kind of memory leak.
 //
@@ -69,7 +69,7 @@ import (
 //    containing no elements would indicate an empty queue.
 //  - The inner and outer slices all behave as circular queues, for time
 //    and memory optimization.
-//	- The outer queue keeps a buffer slice outside the head and tail; the
+//  - The outer queue keeps a buffer slice outside the head and tail; the
 //    buffer is not there from initialization, but as the queue grows and
 //    shrinks, a buffer slice will be kept to avoid discarding and
 //    reallocating the same slice redundantly during edge cases.
